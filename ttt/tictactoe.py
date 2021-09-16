@@ -74,12 +74,18 @@ class TicTacToeBoard(object):
                     return
     
     def check_winner(self):
+        ''' Returns the current winner (None, 'x', or 'o').
+        '''
         return self._winner
     
     def finished(self):
+        ''' Returns True if the game finished.
+        '''
         return self._move_count == self._CELLS
     
     def get_player(self):
+        ''' Returns the current player (not the last one who played).
+        '''
         return self._current_player
 
 

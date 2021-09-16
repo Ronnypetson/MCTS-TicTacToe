@@ -28,7 +28,6 @@ def traverse(node: TTTState) -> TTTState:
         current.set_children()
     if len(current.children) == 0:
         return None
-    #current.visited = True
     unvisited_children = [child for child in current.children if not child.visited]
     child_id = np.random.randint(0, len(unvisited_children))
     leaf = unvisited_children[child_id]
@@ -73,7 +72,6 @@ def MCTS(root: TTTState, num_iter: int = 200) -> TTTState:
     ''' Performs "num_iter" simulations of Monte-Carlo Tree Search
         and returns the selected next move.
     '''
-    #root.visited = True
     root.set_children()
     for _ in range(num_iter):
         leaf = traverse(root)

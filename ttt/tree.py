@@ -14,18 +14,28 @@ class TTTState:
         self.expanded = False
     
     def increase_Q(self):
+        ''' Increases Q by 1, the number of (simulated) wins from the current
+            position for the last player (not current player).
+        '''
         self.Q += 1
 
     def increase_N(self):
+        ''' Increases N by 1, the number of simulated matches finished from the
+            current position.
+        '''
         self.N += 1
     
     def increase_draw(self):
+        ''' Increases both N and Q by 0.5, reflecting the simulated draws from
+            the current position.
+        '''
         self.Q += 0.5
         self.N += 0.5
     
     def set_children(self):
-        ''' self.children must be set only once.
+        ''' Sets up the node children (possible next states) if not set already.
         '''
+        # self.children must be set only once.
         if len(self.children) > 0:
             return
         for row in range(self.board._ROWS):
@@ -37,6 +47,9 @@ class TTTState:
                     self.children.append(child)
     
     def is_expanded(self):
+        ''' Checks if all of the node's children are visited.
+            If the node hasn't any children (terminal state), returns False.
+        '''
         if len(self.children) == 0:
             return False
         unvisited_children = [child for child in self.children if not child.visited]
