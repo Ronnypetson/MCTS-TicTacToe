@@ -24,6 +24,10 @@ class TTTState:
         self.N += 0.5
     
     def set_children(self):
+        ''' self.children must be set only once.
+        '''
+        if len(self.children) > 0:
+            return
         for row in range(self.board._ROWS):
             for column in range(self.board._COLUMNS):
                 board = deepcopy(self.board)
@@ -33,6 +37,8 @@ class TTTState:
                     self.children.append(child)
     
     def is_expanded(self):
+        if len(self.children) == 0:
+            return False
         unvisited_children = [child for child in self.children if not child.visited]
         if len(unvisited_children) == 0:
             self.expanded = True

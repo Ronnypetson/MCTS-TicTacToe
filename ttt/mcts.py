@@ -5,12 +5,12 @@ from math import sqrt, log
 import numpy as np
 
 
-def UCT(node: TTTState, child: TTTState, c: float = 1.0) -> float:
+def UCT(node: TTTState, child: TTTState, c: float = 1.141) -> float:
     ''' Returns Upper Confidence Bound of a node wrt the given child.
     '''
     ratio = 0.0 if child.N == 0 else child.Q / child.N
     # Square Root of Log
-    SRL = 0.0 if child.N == 0 else sqrt(log(node.N) / child.N)
+    SRL = 0.0 if child.N == 0 or node.N == 0 else sqrt(log(node.N) / child.N)
     uct = ratio + c * SRL
     return uct
 
@@ -20,11 +20,15 @@ def traverse(node: TTTState) -> TTTState:
         Uses UCT to select the path.
     '''
     current = node
+    current.set_children()
     while current.is_expanded():
         ucts = [UCT(current, child) for child in current.children]
         chosen = np.argmax(ucts)
         current = current.children[chosen]
-    current.visited = True
+        current.set_children()
+    if len(current.children) == 0:
+        return None
+    #current.visited = True
     unvisited_children = [child for child in current.children if not child.visited]
     child_id = np.random.randint(0, len(unvisited_children))
     leaf = unvisited_children[child_id]
@@ -55,21 +59,27 @@ def backpropagate(node: TTTState, result):
     ''' Updates the statistics of nodes along the path
         from root to leaf.
     '''
-    if node.parent is None:
-        return
     assert result in [None, 'x', 'o'], '"result" must be None, "x", or "o"'
     node.increase_N()
     if result is None:
         node.increase_draw()
-    elif result == node.board._current_player:
+    elif result != node.board._current_player:
         node.increase_Q()
-    backpropagate(node.parent, result)
+    if node.parent:
+        backpropagate(node.parent, result)
 
 
 def MCTS(root: TTTState, num_iter: int = 200) -> TTTState:
-    root.visited = True
-    for iter in range(num_iter):
+    ''' Performs "num_iter" simulations of Monte-Carlo Tree Search
+        and returns the selected next move.
+    '''
+    #root.visited = True
+    root.set_children()
+    for _ in range(num_iter):
         leaf = traverse(root)
+        if leaf is None:
+            continue
+        leaf.visited = True
         result = rollout(leaf, uniform_rollout)
         backpropagate(leaf, result)
     child_id = np.argmax([child.N for child in root.children])
@@ -80,6 +90,7 @@ if __name__ == '__main__':
     first_player = 'x'
     board0 = TicTacToeBoard(first_player)
     state0 = TTTState(board0)
+    state0.visited = True
     state0.set_children()
     history = [state0]
 
@@ -88,3 +99,4 @@ if __name__ == '__main__':
         print(stateT.board)
         stateT = MCTS(stateT, num_iter=1000)
         history.append(stateT)
+    print(stateT.board)
